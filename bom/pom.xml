@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>net.lbruun.examples.maven3publish.multi</groupId>
+    <artifactId>parent</artifactId>
+    <version>${revision}${sha1}${changelist}</version> <!-- never change this -->
+  </parent>
+  <artifactId>bom</artifactId>
+  <packaging>pom</packaging>
+  <name>ModernMaven3 :: Multi-module Example :: BOM</name>
+
+
+  <properties>
+    <maven.install.skip>false</maven.install.skip> <!-- override parent's setting -->
+    <gpg.skip>false</gpg.skip>                     <!-- override parent's setting -->
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>module-y</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>module-z</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <build>
+    <plugins>
+      <!-- augment Flatten Plugin's config to make sure the 'dependencyManagement' section
+           is correctly constructed in the flattened POM                                   -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>flatten-maven-plugin</artifactId>
+        <configuration>
+          <updatePomFile>true</updatePomFile>
+          <pomElements>
+            <dependencyManagement>expand</dependencyManagement>
+          </pomElements>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>

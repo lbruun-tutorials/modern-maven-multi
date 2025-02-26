@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd"
+         child.project.url.inherit.append.path="false">
+
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>net.lbruun.examples.maven3publish.multi</groupId>
+  <artifactId>parent</artifactId>
+  <version>${revision}${sha1}${changelist}</version> <!-- never change this -->
+  <packaging>pom</packaging>
+  <name>ModernMaven3 :: Multi-module Example :: Parent</name>
+  <description>Example of how to publish a multi-module Java project to Maven Central using GitHub and Maven.
+  </description>
+
+  <properties>
+    <maven.compiler.source>11</maven.compiler.source>
+    <maven.compiler.target>11</maven.compiler.target>
+    <maven.compiler.release>11</maven.compiler.release>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+    <!-- parent doesn't need to be installed, deployed or signed.
+         (these are overridden in submodules)                -->
+    <maven.install.skip>true</maven.install.skip>
+    <skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>
+    <gpg.skip>true</gpg.skip>
+
+
+    <!-- Some sensible defaults for local development.
+         These vaulues are only used when executing Maven locally. -->
+    <revision/>
+    <changelist>LATEST-SNAPSHOT</changelist>
+    <sha1/>
+    <ci.project.url>https://UNKNOWN.ORG</ci.project.url> <!-- placeholder: set dynamically by the CI system -->
+  </properties>
+
+
+  <url>${ci.project.url}</url>
+
+  <licenses>
+    <license>
+      <name>The Apache License, Version 2.0</name>
+      <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <name>Lars Bruun-Hansen</name>
+      <organization>lbruun.net</organization>
+      <organizationUrl>https://github.com/lbruun</organizationUrl>
+    </developer>
+  </developers>
+
+
+  <!-- This section is not used in the deploy/release process (since we do not use the
+       Maven Release Plugin), but is required to exist for publishing to Maven Central.
+       Iikes -->
+  <scm child.scm.url.inherit.append.path="false">
+    <url>${ci.project.url}</url>
+  </scm>
+
+  <modules>
+    <module>module-x</module>
+    <module>module-y</module>
+    <module>module-z</module>
+    <module>bom</module>
+  </modules>
+
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <!-- The 'flatten-maven-plugin' is required because we use Maven CI Friendly feature
+             and because this is a multi-module project.
+             See https://maven.apache.org/maven-ci-friendly.html for more information.
+             In Maven 4 we can finally get rid of this plugin.                                 -->
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>flatten-maven-plugin</artifactId>
+          <version>1.6.0</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>flatten-maven-plugin</artifactId>
+        <version>1.6.0</version>
+        <configuration>
+          <flattenMode>ossrh</flattenMode>
+        </configuration>
+        <executions>
+          <!-- enable flattening -->
+          <execution>
+            <id>flatten</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>flatten</goal>
+            </goals>
+          </execution>
+          <!-- ensure proper cleanup -->
+          <execution>
+            <id>flatten.clean</id>
+            <phase>clean</phase>
+            <goals>
+              <goal>clean</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+
+  <profiles>
+    <profile>
+      <!-- This profile should be activated when building in the CI system -->
+      <id>ci</id>
+      <activation>
+        <property>
+          <!-- Many CI systems, e.g. GitHub, GitLab, Travis, etc, set this variable -->
+          <name>env.CI</name>
+          <value>true</value>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <!--  Javadoc here because we want to know early if there are errors in Javadoc generation.
+                In the standard Sonatype guidelines it is inside the 'release-to-central' profile
+                which means we will not discover Javadoc errors until we decide to release.
+                Instead, we pay the price of Javadoc generation on every push: an acceptable tradeoff.
+          -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <version>3.6.2</version>
+            <executions>
+              <execution>
+                <id>attach-javadocs</id>
+                <goals>
+                  <goal>jar</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+
+
+          <!-- Get info from Git. The only reason for this is so that we can put
+               such information into the JAR's manifest. This is purely nice-to-have
+               but is in particular handy for SNAPSHOT releases. -->
+          <plugin>
+            <groupId>io.github.git-commit-id</groupId>
+            <artifactId>git-commit-id-maven-plugin</artifactId>
+            <version>9.0.1</version>
+            <executions>
+              <execution>
+                <id>get-the-git-infos</id>
+                <goals>
+                  <goal>revision</goal>
+                </goals>
+                <phase>initialize</phase>
+              </execution>
+            </executions>
+            <configuration>
+              <generateGitPropertiesFile>false</generateGitPropertiesFile>
+            </configuration>
+          </plugin>
+
+          <!-- Add info entries to MANIFEST.MF file -->
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-jar-plugin</artifactId>
+            <configuration>
+              <archive>
+                <manifestEntries>
+                  <git-commit-id>${git.commit.id.abbrev}</git-commit-id>
+                  <project-url>${ci.project.url}</project-url>
+                </manifestEntries>
+              </archive>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+
+    <!-- This profile should be activated when creating releases into Maven Central
+         (regardless if regular release or snapshot release). -->
+    <profile>
+      <id>release-to-central</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-source-plugin</artifactId>
+            <version>3.2.1</version>
+            <executions>
+              <execution>
+                <id>attach-sources</id>
+                <goals>
+                  <goal>jar-no-fork</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>3.2.7</version>
+            <executions>
+              <execution>
+                <id>sign-artifacts</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>sign</goal>
+                </goals>
+                <configuration>
+                  <signer>bc</signer> <!-- use Bouncy Castle -->
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+
+
+          <plugin>
+            <groupId>org.sonatype.plugins</groupId>
+            <artifactId>nexus-staging-maven-plugin</artifactId>
+            <version>1.7.0</version>
+            <extensions>true</extensions>
+            <configuration>
+              <serverId>maven-central</serverId>
+
+              <!--
+              Projects which has registered with Sonatype/MavenCentral after February 2021 use
+              #        "s01.oss.sonatype.org" as the hostname in the URLs below. Change accordingly.
+              -->
+              <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+
+              <!-- Flip this if you feel confident about your build and its validity
+                   vis-à-vis the rules of Maven Central                                    -->
+              <autoReleaseAfterClose>false</autoReleaseAfterClose>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
+</project>
