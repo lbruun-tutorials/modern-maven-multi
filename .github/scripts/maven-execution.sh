@@ -1,6 +1,7 @@
 #!/bin/bash
 #
-#  Execute Maven in a GitHub workflow.
+#  Execute Maven in a GitHub workflow. Suitable for library projects.
+#
 #  The POM is expected to use the "Maven CI Friendly" paradigm.
 #  (https://maven.apache.org/maven-ci-friendly.html)
 #
@@ -16,9 +17,9 @@ set -e
 
 
 # SemVer regular expression:
-#  - The tag can optionally start with the 'v' but the 'v' doesn't become part of the Maven version string.
+#  - The tag can optionally start with 'v' but the 'v' doesn't become part of the Maven version string.
 #
-# -  We allow the X.Y.Z version to have a pre-release suffix, e.g. "3.2.0-RC1" but if
+#  - We allow the X.Y.Z version to have a pre-release suffix, e.g. "3.2.0-RC1" but if
 #    so we tell Maven that this is a SNAPSHOT release. In other words: tag "3.2.0-RC1" will
 #    be published as version "3.2.0-RC1-SNAPSHOT" and will therefore go into the OSS Sonatype snapshot repo,
 #    not Maven Central.
@@ -80,8 +81,6 @@ fi
 
 # Execute maven
 #
-#
-#   - We expect a settings.xml file to exist which defines credentials for a Server with id 'maven-central'
 #
 set -x
 ./mvnw \

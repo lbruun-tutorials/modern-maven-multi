@@ -20,14 +20,15 @@
 
   <dependencyManagement>
     <dependencies>
+      <!-- no need to mention the 'core' module as it is only indirectly used -->
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>module-y</artifactId>
+        <artifactId>printing</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
         <groupId>${project.groupId}</groupId>
-        <artifactId>module-z</artifactId>
+        <artifactId>hex</artifactId>
         <version>${project.version}</version>
       </dependency>
     </dependencies>
@@ -35,8 +36,9 @@
 
   <build>
     <plugins>
-      <!-- augment Flatten Plugin's config to make sure the 'dependencyManagement' section
-           is correctly constructed in the flattened POM                                   -->
+      <!-- Specifically for BOMs:
+           augment Flatten Plugin's config to make sure the 'dependencyManagement' section
+           is correctly constructed in the flattened POM                                -->
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>flatten-maven-plugin</artifactId>

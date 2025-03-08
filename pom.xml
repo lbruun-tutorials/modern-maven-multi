@@ -26,7 +26,7 @@
 
 
     <!-- Some sensible defaults for local development.
-         These vaulues are only used when executing Maven locally. -->
+         These values are only used when executing Maven locally. -->
     <revision/>
     <changelist>LATEST-SNAPSHOT</changelist>
     <sha1/>
@@ -35,6 +35,9 @@
 
 
   <url>${ci.project.url}</url>
+  <organization>
+    <name>lbruun.net</name>
+  </organization>
 
   <licenses>
     <license>
@@ -53,16 +56,15 @@
 
 
   <!-- This section is not used in the deploy/release process (since we do not use the
-       Maven Release Plugin), but is required to exist for publishing to Maven Central.
-       Iikes -->
+       Maven Release Plugin), but is mandatory for publishing to Maven Central. -->
   <scm child.scm.url.inherit.append.path="false">
     <url>${ci.project.url}</url>
   </scm>
 
   <modules>
-    <module>module-x</module>
-    <module>module-y</module>
-    <module>module-z</module>
+    <module>core</module>
+    <module>printing</module>
+    <module>hex</module>
     <module>bom</module>
   </modules>
 
@@ -73,11 +75,20 @@
         <!-- The 'flatten-maven-plugin' is required because we use Maven CI Friendly feature
              and because this is a multi-module project.
              See https://maven.apache.org/maven-ci-friendly.html for more information.
-             In Maven 4 we can finally get rid of this plugin.                                 -->
+             In Maven 4 we can finally get rid of this plugin.                         -->
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>flatten-maven-plugin</artifactId>
           <version>1.6.0</version>
+        </plugin>
+
+        <!-- The 'templating-maven-plugin' is used to create the LibraryInfo class
+             with static information about the library, accessible at runtime.
+             You can remove this if you don't need such feature.                       -->
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>templating-maven-plugin</artifactId>
+          <version>3.0.0</version>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -85,8 +96,18 @@
     <plugins>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
+        <artifactId>templating-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>filter-sources</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
         <artifactId>flatten-maven-plugin</artifactId>
-        <version>1.6.0</version>
         <configuration>
           <flattenMode>ossrh</flattenMode>
         </configuration>
@@ -146,9 +167,7 @@
           </plugin>
 
 
-          <!-- Get info from Git. The only reason for this is so that we can put
-               such information into the JAR's manifest. This is purely nice-to-have
-               but is in particular handy for SNAPSHOT releases. -->
+          <!-- Get info from Git. The only reason for this is the LibraryInfo class. -->
           <plugin>
             <groupId>io.github.git-commit-id</groupId>
             <artifactId>git-commit-id-maven-plugin</artifactId>
@@ -162,23 +181,6 @@
                 <phase>initialize</phase>
               </execution>
             </executions>
-            <configuration>
-              <generateGitPropertiesFile>false</generateGitPropertiesFile>
-            </configuration>
-          </plugin>
-
-          <!-- Add info entries to MANIFEST.MF file -->
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-jar-plugin</artifactId>
-            <configuration>
-              <archive>
-                <manifestEntries>
-                  <git-commit-id>${git.commit.id.abbrev}</git-commit-id>
-                  <project-url>${ci.project.url}</project-url>
-                </manifestEntries>
-              </archive>
-            </configuration>
           </plugin>
         </plugins>
       </build>
@@ -246,5 +248,4 @@
       </build>
     </profile>
   </profiles>
-
 </project>

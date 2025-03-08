@@ -6,8 +6,7 @@
 
 # Define some file types explicitly as being text.
 # This makes sure that we can never inadvertently get a file of this type into the repo with a line ending
-# other than the one designated below. This will also override the user's own global git settings
-# for these file types.
+# other than the one designated below. (regardless of the developer's local settings)
 
 *.java            text eol=lf
 *.md              text eol=lf

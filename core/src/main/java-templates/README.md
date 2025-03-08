@@ -1,0 +1,1 @@
+Used by the [Templating Maven Plugin](https://www.mojohaus.org/templating-maven-plugin/index.html)
