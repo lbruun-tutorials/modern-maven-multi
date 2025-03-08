@@ -85,7 +85,7 @@ fi
 set -x
 ./mvnw \
   --show-version \
-  --non-interactive \
+  --batch-mode \
   --no-transfer-progress \
   -Dci.project.url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" \
   -Dchangelist=$mvn_ci_changelist  -Dsha1=$mvn_ci_sha1_short  -Drevision=$mvn_ci_revision \

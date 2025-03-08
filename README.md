@@ -67,8 +67,8 @@ Note, that specifically for BOM project, the Flatten Plugin need some extra atte
 
 ### Library information
 
-It is a nice gesture to users if a library exposes static information about itself, for example the library's version,
-the library's build time, etc. 
+It is a nice gesture to users if a library exposes static information about itself, available at runtime, 
+for example the library's version, the library's build time, etc. 
 
 In this repo you can find an example of how to do this. 
 It uses the [Templating Maven Plugig](https://www.mojohaus.org/templating-maven-plugin/)
