@@ -26,14 +26,22 @@ Note, that for multi-module projects which use the _Maven CI Friendly Versioning
 the [Flatten Maven Plugin](https://www.mojohaus.org/flatten-maven-plugin/) too. Don't worry about this. 
 It works well. And it will not be necessary in Maven 4.
 
-### Use Maven Wrapper
+### Maven Wrapper
 
 There is really no reason _not_ to use the [Maven Wrapper](https://maven.apache.org/wrapper/) these days.
 It makes you independent of the Maven version supplied by your build host. 
 Always, always use it. 
 
-Yes, in theory it means that a Maven distribution package needs to downloaded and unpacked.
-However, on a platform like GitHub, such assets are cached
+Yes, in theory it means that a Maven distribution package needs to downloaded and unpacked for every CI job
+execution. However, on a platform like GitHub, such assets are cached and not actually fetched from afar.
+Using the Linux `time` command I get 80 milliseconds used for the download of Maven and 70 
+milliseconds used for unpacking it. In other words: negligible. Don't worry about it.
+
+To be fair, the Wrapper actually has some dependencies of its own: 
+- `wget` (alternatively `curl`) must be available in the PATH.
+- `unzip` (alternatively `tar`) must be available in the PATH.
+
+but these are typically easy to fulfill.
 
 ### BOM
 
@@ -89,6 +97,17 @@ When this happens there are a lot of places where it needs to be changed.
 This repository promotes the idea that this information should be supplied by your CI system 
 instead of being static text in your POM.
 
+### Signing with Bouncy Castle, not the GnuPG
+
+If you want to publish into Maven Central then the artifacts must be signed.
+Back in the days you would need to rely on the build host having the [GnuPG](https://www.gnupg.org/) binary
+available. This was a real hassle in more ways than one. For every new version of GnuPG they
+would change something that would make it more secure but which quite often meant that unattended usage
+(like in a CI pipeline) would break.
+
+Nowadays, the [Maven JarSigner Plugin](https://maven.apache.org/plugins/maven-jarsigner-plugin/) supports
+Bouncy Castle as an alternative. This is pure java and is bundled with the plugin. Much more stable
+and much more reliable. Use it!
 
 
 ## Prerequisites

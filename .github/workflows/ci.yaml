@@ -19,7 +19,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Java and Maven
+      - name: Set up Java and Maven settings
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
