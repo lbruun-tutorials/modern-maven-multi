@@ -83,7 +83,7 @@ fi
 #
 #
 set -x
-MVNW_VERBOSE=true ./mvnw \
+./mvnw \
   --show-version \
   --batch-mode \
   --no-transfer-progress \
