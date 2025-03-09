@@ -130,9 +130,9 @@ In other words: Once generated you will in principle no longer need GnuPG.
 In this example project the following GitHub Secrets must exist:
 
 - `MAVEN_CENTRAL_GPG_SECRET_KEY`. Private key used for signing artifacts published to Maven Central. The value
-  must be in [TSK format](https://www.ietf.org/archive/id/draft-ietf-openpgp-crypto-refresh-12.html#name-transferable-secret-keys). This is text format which begins with the text `-----BEGIN PGP PRIVATE KEY BLOCK-----`.
-  If using GnuPG you can simply take the output from the `gpg --export-secret-key --armor` command and paste it directly into GitHub UI when
-  you configure the value for this secret (never mind it is a multi-line value).
+  must be in [TSK format](https://www.ietf.org/archive/id/draft-ietf-openpgp-crypto-refresh-12.html#name-transferable-secret-keys). This is a text format which begins with the text `-----BEGIN PGP PRIVATE KEY BLOCK-----`.
+  If using GnuPG you can simply take the output from the `gpg --export-secret-key --armor` command and paste it
+  directly into GitHub UI when you configure the value for this secret (never mind it is a multi-line value).
 
 - `MAVEN_CENTRAL_GPG_PASSPHRASE`. Passphrase to accompany your private key.
 
