@@ -12,8 +12,9 @@
   <name>ModernMaven3 :: Multi-module Example - Serendipity :: Hex</name>
 
   <properties>
-    <maven.install.skip>false</maven.install.skip> <!-- override parent's setting -->
-    <gpg.skip>false</gpg.skip>                     <!-- override parent's setting -->
+    <maven.install.skip>false</maven.install.skip>                  <!-- override parent's setting -->
+    <gpg.skip>false</gpg.skip>                                      <!-- override parent's setting -->
+    <skipNexusStagingDeployMojo>false</skipNexusStagingDeployMojo>  <!-- override parent's setting -->
   </properties>
 
   <dependencies>

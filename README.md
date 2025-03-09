@@ -33,8 +33,8 @@ It works well. And it will not be necessary in Maven 4.
 
 ### Maven Wrapper
 
-There is really no reason _not_ to use the [Maven Wrapper](https://maven.apache.org/wrapper/) these days.
-It makes you independent of the Maven version supplied by your build host. 
+There is really no reason _not_ to use the [Maven Wrapper](https://maven.apache.org/wrapper/) these days.. at least
+for library projects. It makes you independent of the Maven version supplied by your build host. 
 Always, always use it for library projects.
 
 Yes, in theory it means that a Maven distribution package needs to be downloaded and unpacked for every CI job
@@ -46,9 +46,11 @@ To be fair, the Wrapper actually has some dependencies of its own:
 - `wget` (alternatively `curl`) must be available in the PATH.
 - `unzip` must be available in the PATH.
 
-but these requirements are typically easy to fulfill ... at least for library projects. By contrast, for app projects, you might 
+but these requirements are typically easy to fulfill for library projects. By contrast, for app projects, you might 
 be using some buildpack or what not to build a docker image. In such environment the `wget` and
-`unzip` may not be available, so for these type of projects use of the Maven Wrapper might be obstructed.
+`unzip` may not be available, so for these type of projects use of the Maven Wrapper might be obstructed. 
+In such situation you might want to investigate using the wrapper in the mode with a checked
+binary JAR as this mode does not require any external tools.
 
 
 
