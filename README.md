@@ -56,7 +56,7 @@ sure to publish a BOM (Bill of Material) too. This makes it a lot easier for the
 of your library suite.
 
 In this repo you can find an [example](bom/) of how to do this. A BOM project is really 
-just of Maven project with `<packaging>pom</packaging>` and with a `<dependencyManagement>` which
+just of Maven project with `<packaging>pom</packaging>` and with a `<dependencyManagement>` section which
 lists the individual libraries of your suite.
 
 Note, that specifically for a BOM project, the Flatten Plugin need some extra attention:
@@ -83,7 +83,7 @@ It is a nice gesture to users if a library exposes static information about itse
 for example the library's version, the library's build time, etc. 
 
 In this repo you can find an example of how to do this. 
-It uses the [Templating Maven Plugig](https://www.mojohaus.org/templating-maven-plugin/)
+It uses the [Templating Maven Plugin](https://www.mojohaus.org/templating-maven-plugin/)
 to construct a class named `LibraryInfo` which has certain data properties which are set as constants
 by the Maven build. There are possibly a dozen other ways to do this too. However, I find the methodology presented 
 here to be the most convenient. Unfortunately, it leads to a bit of duplication, but you may find a way
