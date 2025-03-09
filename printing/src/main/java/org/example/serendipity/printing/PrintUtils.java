@@ -1,6 +1,6 @@
 package org.example.serendipity.printing;
 
-import org.example.core.FormattingUtils;
+import org.example.serendipity.core.FormattingUtils;
 
 public class PrintUtils {
 
