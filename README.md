@@ -160,8 +160,8 @@ are not necessarily released all the way into Central. This is because the files
 your files for publication into Central using Sonatype's Web UI. The latter can be automated but unlike the traditional
 deployment flow - which ends when files are uploaded - there are clearly more steps involved here.
 
-As of March 2025 there are at least 3 ways to publish your artifacts into Maven Central.
-(Sonatype is the company which manages Central)
+As of March 2025 there are at least 3 ways to publish your artifacts into Maven Central. Which one to use
+largely depends on when your namespace was registered with Central:
 
 - Your namespace was registered with Central _before_ March 2024. Sonatype has given you a URL to publish
 to which is either `s01.oss.sonatype.org` (projects after Feb 2021) or `oss.sonatype.org` (projects before Feb 2021).
@@ -192,7 +192,6 @@ to disk. Unfortunately, sometimes a `settings.xml` file is still required, but i
 
 ```xml
 <settings>
-    
     <servers>
         <server>
             <id>maven-central</id>
@@ -213,8 +212,7 @@ dealing with GnuPG secrets but such feature is no longer relevant now that we ar
 
 
 
-
-##### Maven Deploy Plugin
+##### Maven Deploy Plugin - setup
 
 There is no need for a `<distributionManagement>` section in the POM. Not having it promotes the idea that
 publication of artifacts should never be done by developer's workstation.
@@ -242,7 +240,7 @@ where environment variables would depend on when your namespace was registered o
 The username/password must be your token credentials from OSSRH. This is different from the username/password
 used for logging into the UI.
 
-Assuming you have created a `settings.xml` file as explained above then you simply need to make such environment
+Assuming you have created a `settings.xml` file as explained in the "Supplying credentials" section above then you simply need to make such environment
 variables available to the "mvn deploy" execution. Like this: 
 
 ```yaml
@@ -254,8 +252,7 @@ variables available to the "mvn deploy" execution. Like this:
 ```
 
 
-##### Nexus Staging Plugin (by Sonatype)
-
+##### Nexus Staging Plugin (by Sonatype) - setup
 
 There is no need for a `<distributionManagement>` section in the POM. 
 
@@ -286,8 +283,8 @@ The plugin configuration should look something like the below:
 The username/password must be your token credentials from OSSRH. This is different from the username/password
 used for logging into the UI.
 
-Assuming you have created a `settings.xml` file as explained above then you simply need to make such environment
-variables available to the "mvn deploy" execution. Like this:
+Assuming you have created a `settings.xml` file as explained in the "Supplying credentials" section above then you 
+simply need to make such environment variables available to the "mvn deploy" execution. Like this:
 
 ```yaml
       - name: Maven execution
@@ -300,7 +297,7 @@ variables available to the "mvn deploy" execution. Like this:
 
 
 
-##### Central Publishing Plugin (by Sonatype)
+##### Central Publishing Plugin (by Sonatype) - setup
 
 There is no need for a `<distributionManagement>` section in the POM.
 
@@ -325,8 +322,8 @@ The plugin configuration should look something like the below:
 The username/password must be your token credentials from Central Portal. This is different from the username/password
 used for logging into the UI.
 
-Assuming you have created a `settings.xml` file as explained above then you simply need to make such environment
-variables available to the "mvn deploy" execution. Like this:
+Assuming you have created a `settings.xml` file as explained in the "Supplying credentials" section above then you 
+simply need to make such environment variables available to the "mvn deploy" execution. Like this:
 
 ```yaml
       - name: Maven execution
@@ -340,47 +337,6 @@ variables available to the "mvn deploy" execution. Like this:
 
 
 
-## Prerequisites
-
-
-### POM
-
-- Must be using the [Maven CI Friendly feature](https://maven.apache.org/maven-ci-friendly.html) and the version
-element must be `<version>${revision}${sha1}${changelist}</version>`. 
-(IMO, all your projects should be using the Maven CI Friendly version paradigm)
-
-- Must have a profile named `release-to-central` and one named `ci`. See the example in this repo.
-
-
-### GitHub Secrets
-
-
-### GnuPG key and passphrase for signing the artifact
-
-The following GitHub Secrets must exist:
-
-- `MAVEN_CENTRAL_GPG_SECRET_KEY`. Private key used for signing artifacts published to Maven Central. The value
-must be in [TSK format](https://www.ietf.org/archive/id/draft-ietf-openpgp-crypto-refresh-12.html#name-transferable-secret-keys)
-You can simply take the output from the `gpg --export-secret-key --armor` command and paste it directly into GitHub UI when
-you configure the value for this secret (never mind it is a multi-line value).
-
-- `MAVEN_CENTRAL_GPG_PASSPHRASE`. Passphrase to accompany your private key.
-
-
-### Credentials for publishing to Maven Central
-
-You must have a Sonatype Nexus token that allows to publish to Maven Central. It is a string which looks like this:`kFCdW7Su:XKAO3FIWcY731jt3rRDIexfrGVqQLFbjqwOJtiGgEQtP`
-(first part before colon we refer to as 'username' and second part after colon as 'password')
-
-The following GitHub Secrets must exist:
-
-- `MAVEN_CENTRAL_USERNAME`. Username part of the Sonatype Nexus token you use to publish to Maven Central. (*)
- 
-- `MAVEN_CENTRAL_PASSWORD`. Password part of the Sonatype Nexus token you use to publish to Maven Central. (*)
-
-*) You can also use your old-style username/password for the Sonatype Nexus UI instead of token. However, Sonatype has announced that 
-old-style username/password will eventually stop working for publishing. You still need your old-style username/password to log 
-into the Sonatype Nexus UI, though.
 
 
 ## Releasing
@@ -402,6 +358,6 @@ indeed it should be hard!
 
 ## How do I know if my flow works? (without publishing)
 
-Simple: Just create a snapshot release, meaning create a release from the GitHub UI with a prerelease suffix. 
-This will test that the signing works and that your credentials for Maven Central works. Without creating
-a true release.
+Simple: Just create a snapshot release, meaning create a release from the GitHub UI with a prerelease suffix,
+for example `3.9.0-RC1`. This will test that the signing works and that your credentials for Maven Central works. 
+Without creating a true release.
