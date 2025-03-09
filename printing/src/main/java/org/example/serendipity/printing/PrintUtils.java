@@ -1,4 +1,4 @@
-package org.example.printing;
+package org.example.serendipity.printing;
 
 import org.example.core.FormattingUtils;
 

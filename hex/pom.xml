@@ -4,12 +4,12 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>net.lbruun.examples.maven3publish.multi</groupId>
+    <groupId>net.lbruun.examples.serendipity</groupId>
     <artifactId>parent</artifactId>
     <version>${revision}${sha1}${changelist}</version> <!-- never change this -->
   </parent>
   <artifactId>hex</artifactId>
-  <name>ModernMaven3 :: Multi-module Example :: Hex</name>
+  <name>ModernMaven3 :: Multi-module Example - Serendipity :: Hex</name>
 
   <properties>
     <maven.install.skip>false</maven.install.skip> <!-- override parent's setting -->

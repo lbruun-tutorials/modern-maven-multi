@@ -1,8 +1,8 @@
-package org.example.core;
+package org.example.serendipity.hex;
 
-public class FormattingUtils {
+public class HexUtils {
 
-    private FormattingUtils() {}
+    private HexUtils() {}
 
     public static String format(String str) {
         return str; // example code: do nothing

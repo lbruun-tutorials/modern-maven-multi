@@ -5,6 +5,10 @@ Example of a library suite.
 It serves as an opinionated best practice for how to structure such a use-case, 
 in particular with focus on Maven.
 
+The example presented here is a pretend library suite named _serendipity_ which
+has a number of modules as well as a BOM. You can use it as a template for your
+own library suite.
+
 
 ## Features
 
