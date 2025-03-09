@@ -151,7 +151,7 @@ like `.cmd` or `.bat` files. These should use Windows-style line endings (`CRLF`
 ### Deploying to Maven Central
 
 Sonatype is the company that created Central. They set the validation rules as well as define the process
-for upload->release.
+for upload-and-release.
 
 Some background first: Deploying to Central is unlike deploying to your in-house Maven repository. Not only will files 
 need to be signed but the process itself is also different as it is not synchronous: Once files are uploaded they
@@ -173,10 +173,10 @@ It means you are effectively publishing into a Sonatype Nexus2 instance. You hav
       After the upload succeeds you will have to log into the OSSRH Web Site and "release" your artifact...
       assuming it has passed validation.
       In any case, if you do choose to use this plugin then definitely use the `deployAtEnd` feature
-      if in a multi-module project.
+      if in a multi-module project. You can find more information of how to use this plugin for deploying to Central, below.
     - You can use the [Nexus Staging Plugin](https://github.com/sonatype/nexus-maven-plugins/tree/main/staging/maven-plugin).
       This will allow you to fully automate the process if you so wish. I recommend using it over the
-      standard Deploy Plugin.
+      standard Deploy Plugin. You can find more information of how to use this plugin for deploying to Central, below.
 - Your namespace was registered with Central _after_ March 2024. It means your project is on the new "Central Portal"
   solution. This solution no longer supports one-by-one file uploads so use of the standard Deploy Plugin is no longer
   an option. Also, the Nexus Staging Plugin is no longer an option. Instead, upload _must_ be done using their REST API 
@@ -184,6 +184,7 @@ It means you are effectively publishing into a Sonatype Nexus2 instance. You hav
   There is the [Central Publishing Maven Plugin](https://central.sonatype.org/publish/publish-portal-maven/)
   for your Maven workflow so you do not have to deal with the REST API. The plugin allow you to fully automate 
   the release process if you so wish.
+  You can find more information of how to use this plugin for deploying to Central, below.
       
 #### Supplying credentials
 
