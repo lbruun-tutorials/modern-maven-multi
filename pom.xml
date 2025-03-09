@@ -234,8 +234,8 @@
               <serverId>maven-central</serverId>
 
               <!--
-              Projects which has registered with Sonatype/MavenCentral after February 2021 use
-              #        "s01.oss.sonatype.org" as the hostname in the URLs below. Change accordingly.
+                Projects which has registered with Sonatype/MavenCentral after February 2021 use
+                "s01.oss.sonatype.org" as the hostname in the URL below. Change accordingly.
               -->
               <nexusUrl>https://oss.sonatype.org/</nexusUrl>
 

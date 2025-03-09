@@ -119,6 +119,25 @@ Nowadays, the [Maven JarSigner Plugin](https://maven.apache.org/plugins/maven-ja
 Bouncy Castle as an alternative. This is pure java and is bundled with the plugin. Much more stable
 and much more reliable. Use it!
 
+
+#### Secret key and passphrase for signing the files
+
+This guide assumes that you already have a secret key and passphrase for signing files with.
+You can find lots of information on the internet about how to create this. This may indeed involve using
+the GnuPG binaries. However, this is only necessary for _generating_ the key and passphrase. 
+In other words: Once generated you will in principle no longer need GnuPG.
+
+In this example project the following GitHub Secrets must exist:
+
+- `MAVEN_CENTRAL_GPG_SECRET_KEY`. Private key used for signing artifacts published to Maven Central. The value
+  must be in [TSK format](https://www.ietf.org/archive/id/draft-ietf-openpgp-crypto-refresh-12.html#name-transferable-secret-keys). This is text format which begins with the text `-----BEGIN PGP PRIVATE KEY BLOCK-----`.
+  If using GnuPG you can simply take the output from the `gpg --export-secret-key --armor` command and paste it directly into GitHub UI when
+  you configure the value for this secret (never mind it is a multi-line value).
+
+- `MAVEN_CENTRAL_GPG_PASSPHRASE`. Passphrase to accompany your private key.
+
+
+
 ### .gitattributes
 
 Adding a [.gitattributes](.gitattributes) file to your repository with definitions of line endings is a really good idea.
@@ -127,6 +146,198 @@ developer's workstation. This is in particular important for projects where many
 Nowadays, even for Windows developers, there is no problem in promoting the rule that all text-based files
 should be use Unix-style line endings (`LF`). The only exception is scripts meant to be executed on Windows, 
 like `.cmd` or `.bat` files. These should use Windows-style line endings (`CRLF`).
+
+
+### Deploying to Maven Central
+
+Sonatype is the company that created Central. They set the validation rules as well as define the process
+for upload->release.
+
+Some background first: Deploying to Central is unlike deploying to your in-house Maven repository. Not only will files 
+need to be signed but the process itself is also different as it is not synchronous: Once files are uploaded they
+are not necessarily released all the way into Central. This is because the files need to go through a validation
+(which may take some minutes) and secondly because the default is that you are supposed to manually (after upload) 'release' 
+your files for publication into Central using Sonatype's Web UI. The latter can be automated but unlike the traditional
+deployment flow - which ends when files are uploaded - there are clearly more steps involved here.
+
+As of March 2025 there are at least 3 ways to publish your artifacts into Maven Central.
+(Sonatype is the company which manages Central)
+
+- Your namespace was registered with Central _before_ March 2024. Sonatype has given you a URL to publish
+to which is either `s01.oss.sonatype.org` (projects after Feb 2021) or `oss.sonatype.org` (projects before Feb 2021).
+This is known as the "Sonatype OSSRH", Sonatype Open Source Software Repository Hosting. 
+It means you are effectively publishing into a Sonatype Nexus2 instance. You have the following two options:
+    - You can use the standard [Maven Deploy Plugin](https://maven.apache.org/plugins/maven-deploy-plugin/). 
+      This will upload files one-by-one and is therefore not the most effective solution. It will also not allow
+      you to fully automate the process of getting your artifact published all the way into Central:
+      After the upload succeeds you will have to log into the OSSRH Web Site and "release" your artifact...
+      assuming it has passed validation.
+      In any case, if you do choose to use this plugin then definitely use the `deployAtEnd` feature
+      if in a multi-module project.
+    - You can use the [Nexus Staging Plugin](https://github.com/sonatype/nexus-maven-plugins/tree/main/staging/maven-plugin).
+      This will allow you to fully automate the process if you so wish. I recommend using it over the
+      standard Deploy Plugin.
+- Your namespace was registered with Central _after_ March 2024. It means your project is on the new "Central Portal"
+  solution. This solution no longer supports one-by-one file uploads so use of the standard Deploy Plugin is no longer
+  an option. Also, the Nexus Staging Plugin is no longer an option. Instead, upload _must_ be done using their REST API 
+  which only supports bundle uploads. 
+  There is the [Central Publishing Maven Plugin](https://central.sonatype.org/publish/publish-portal-maven/)
+  for your Maven workflow so you do not have to deal with the REST API. The plugin allow you to fully automate 
+  the release process if you so wish.
+      
+#### Supplying credentials
+
+In a CI workflow you should always favor supplying credentials as environment variables instead of writing them 
+to disk. Unfortunately, sometimes a `settings.xml` file is still required, but if so, it should look like this:
+
+```xml
+<settings>
+    
+    <servers>
+        <server>
+            <id>maven-central</id>
+            <username>${env.MAVEN_CENTRAL_USERNAME}</username>
+            <password>${env.MAVEN_CENTRAL_PASSWORD}</password>
+        </server>
+    </servers>
+</settings>
+```
+
+As you can see the `settings.xml` simply become a vessel for our credentials. 
+
+Luckily, GitHub's own [setup-java action](https://github.com/actions/setup-java) can create such a dummy settings.xml file 
+for us. You can see how to do that [here](.github/workflows/ci.yaml). Note, that this action also has features for
+dealing with GnuPG secrets but such feature is no longer relevant now that we are using Bouncy Castle instead.
+
+
+
+
+
+
+##### Maven Deploy Plugin
+
+There is no need for a `<distributionManagement>` section in the POM. Not having it promotes the idea that
+publication of artifacts should never be done by developer's workstation.
+
+Instead, such values can be supplied on the command line in the CI workflow:
+
+```bash
+./mvnw \
+    -DdeployAtEnd=true \
+    -DaltReleaseDeploymentRepository=maven-central::$mvn_central_release_url \
+    -DaltSnapshotDeploymentRepository=maven-central::$mvn_central_snapshot_url \
+    deploy
+```
+
+where environment variables would depend on when your namespace was registered on Central:
+
+| Registration    | `mvn_central_release_url` | `mvn_central_snapshot_url`                                     |
+|-----------------| --------- |----------------------------------------------------------------|
+| before Feb 2021 | `https://oss.sonatype.org/service/local/staging/deploy/maven2/` | `https://oss.sonatype.org/content/repositories/snapshots/`     |
+| after Feb 2021  | `https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/` | `https://s01.oss.sonatype.org/content/repositories/snapshots/` |
+
+
+
+
+The username/password must be your token credentials from OSSRH. This is different from the username/password
+used for logging into the UI.
+
+Assuming you have created a `settings.xml` file as explained above then you simply need to make such environment
+variables available to the "mvn deploy" execution. Like this: 
+
+```yaml
+      - name: Maven execution
+        run: mvnw deploy
+        env:
+          MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }} # Must be the OSSRH token username, not the username for the UI
+          MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }} # Must be the OSSRH token password, not the password for the UI
+```
+
+
+##### Nexus Staging Plugin (by Sonatype)
+
+
+There is no need for a `<distributionManagement>` section in the POM. 
+
+The plugin configuration should look something like the below:
+
+```xml
+          <plugin>
+            <groupId>org.sonatype.plugins</groupId>
+            <artifactId>nexus-staging-maven-plugin</artifactId>
+            <version>1.7.0</version>
+            <extensions>true</extensions> 
+            <configuration>
+              <serverId>maven-central</serverId>
+
+              <!--
+                 Projects which has registered with Sonatype/MavenCentral after February 2021 use
+                 "s01.oss.sonatype.org" as the hostname in the URLs below. Change accordingly.
+              -->
+              <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+
+              <!-- Flip this if you feel confident about your build, and it passes
+                   the rules of Maven Central                                       -->
+              <autoReleaseAfterClose>false</autoReleaseAfterClose>
+            </configuration>
+          </plugin>
+```
+
+The username/password must be your token credentials from OSSRH. This is different from the username/password
+used for logging into the UI.
+
+Assuming you have created a `settings.xml` file as explained above then you simply need to make such environment
+variables available to the "mvn deploy" execution. Like this:
+
+```yaml
+      - name: Maven execution
+        run: mvnw deploy
+        env:
+          MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }} # Must be the OSSRH token username, not the username for the UI
+          MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }} # Must be the OSSRH token password, not the password for the UI
+```
+
+
+
+
+##### Central Publishing Plugin (by Sonatype)
+
+There is no need for a `<distributionManagement>` section in the POM.
+
+The plugin configuration should look something like the below:
+
+```xml
+          <plugin>
+            <groupId>org.sonatype.central</groupId>
+            <artifactId>central-publishing-maven-plugin</artifactId>
+            <version>0.7.0</version>
+            <extensions>true</extensions>
+            <configuration>
+              <publishingServerId>maven-central</publishingServerId>
+
+              <!-- Flip this if you feel confident about your build, and it passes
+                   the rules of Maven Central                                       -->
+              <autoPublish>false</autoPublish>
+            </configuration>
+          </plugin>
+```
+
+The username/password must be your token credentials from Central Portal. This is different from the username/password
+used for logging into the UI.
+
+Assuming you have created a `settings.xml` file as explained above then you simply need to make such environment
+variables available to the "mvn deploy" execution. Like this:
+
+```yaml
+      - name: Maven execution
+        run: mvnw deploy
+        env:
+          MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }} # Must be the Central Portal token username, not the username for the UI
+          MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }} # Must be the Central Portal token password, not the password for the UI
+```
+
+
+
 
 
 ## Prerequisites
