@@ -5,6 +5,7 @@
 
 
 # Define some file types explicitly as being text.
+#
 # This makes sure that we can never inadvertently get a file of this type into the repo with a line ending
 # other than the one designated below. (regardless of the developer's local settings)
 
@@ -22,4 +23,8 @@
 
 
 # Define some file types explicitly as being binary.
+#
+# (note: it is quite rare that checking in such files to a Git repository is justified,
+#  however for example using the Maven Wrapper with a binary JAR is one such exception)
+#
 *.jar             binary

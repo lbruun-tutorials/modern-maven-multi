@@ -11,16 +11,17 @@ in particular with focus on Maven.
 ### Maven CI friendly versioning
 
 Using the [feature](https://maven.apache.org/guides/mini/guide-maven-ci-friendly.html) introduced with Maven 3.5
-makes your process soooo much simpler. No more [Release Plugin](https://maven.apache.org/maven-release/maven-release-plugin/index.html), 
+makes your release process soooo much simpler. No more [Release Plugin](https://maven.apache.org/maven-release/maven-release-plugin/index.html), 
 no more [Versions Plugin](https://www.mojohaus.org/versions/versions-maven-plugin/index.html). 
 
-Instead, just use your CI platform's _release_ feature. 
+Instead, just use your CI platform's _Release_ feature. 
 
 In this project, we are executing `mvn deploy` if someone pressed the "Release" button. For anything else, simple
 commits, PRs, etc, we execute `mvn verify`.  Figuring out to do `verify` or `deploy` is handled by 
 the [maven-execution.sh](.github/scripts/maven-execution.sh) script. The script does a bit more than that which 
 is basically just some extra bells and whistles like supporting non-production releases (aka snapshot releases). 
-Steal the ideas and customize to your heart's desire.
+Steal the ideas and customize to your heart's desire. It can be made more simple than what is in this
+example.
 
 Note, that for multi-module projects which use the _Maven CI Friendly Versioning_ feature you must use
 the [Flatten Maven Plugin](https://www.mojohaus.org/flatten-maven-plugin/) too. Don't worry about this. 
@@ -30,18 +31,22 @@ It works well. And it will not be necessary in Maven 4.
 
 There is really no reason _not_ to use the [Maven Wrapper](https://maven.apache.org/wrapper/) these days.
 It makes you independent of the Maven version supplied by your build host. 
-Always, always use it. 
+Always, always use it for library projects.
 
-Yes, in theory it means that a Maven distribution package needs to downloaded and unpacked for every CI job
+Yes, in theory it means that a Maven distribution package needs to be downloaded and unpacked for every CI job
 execution. However, on a platform like GitHub, such assets are cached and not actually fetched from afar.
 Using the Linux `time` command I get 80 milliseconds used for the download of Maven and 70 
 milliseconds used for unpacking it. In other words: negligible. Don't worry about it.
 
 To be fair, the Wrapper actually has some dependencies of its own: 
 - `wget` (alternatively `curl`) must be available in the PATH.
-- `unzip` (alternatively `tar`) must be available in the PATH.
+- `unzip` must be available in the PATH.
 
-but these are typically easy to fulfill.
+but these requirements are typically easy to fulfill ... at least for library projects. By contrast, for app projects, you might 
+be using some buildpack or what not to build a docker image. In such environment the `wget` and
+`unzip` may not be available, so for these type of projects use of the Maven Wrapper might be obstructed.
+
+
 
 ### BOM
 
@@ -50,12 +55,11 @@ If your library is really a _suite_ of libraries which can be used together
 sure to publish a BOM (Bill of Material) too. This makes it a lot easier for the consumers
 of your library suite.
 
-In this repo you can find an example of how to do this. A BOM project is really 
+In this repo you can find an [example](bom/) of how to do this. A BOM project is really 
 just of Maven project with `<packaging>pom</packaging>` and with a `<dependencyManagement>` which
 lists the individual libraries of your suite.
 
-
-Note, that specifically for BOM project, the Flatten Plugin need some extra attention:
+Note, that specifically for a BOM project, the Flatten Plugin need some extra attention:
 
 ```xml
       <!-- Specifically for BOMs:
@@ -108,6 +112,15 @@ would change something that would make it more secure but which quite often mean
 Nowadays, the [Maven JarSigner Plugin](https://maven.apache.org/plugins/maven-jarsigner-plugin/) supports
 Bouncy Castle as an alternative. This is pure java and is bundled with the plugin. Much more stable
 and much more reliable. Use it!
+
+### .gitattributes
+
+Adding a [.gitattributes](.gitattributes) file to your repository with definitions of line endings is a really good idea.
+It prevents files with the "wrong" line ending to get into the repo, _regardless_ of the settings of the 
+developer's workstation. This is in particular important for projects where many people collaborate.
+Nowadays, even for Windows developers, there is no problem in promoting the rule that all text-based files
+should be use Unix-style line endings (`LF`). The only exception is scripts meant to be executed on Windows, 
+like `.cmd` or `.bat` files. These should use Windows-style line endings (`CRLF`).
 
 
 ## Prerequisites
