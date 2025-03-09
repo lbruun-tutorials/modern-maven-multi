@@ -55,7 +55,7 @@ be using some buildpack or what not to build a docker image. In such environment
 ### BOM
 
 If your library is really a _suite_ of libraries which can be used together
-(example of library suites: Hibernate, Jackson, etc) then you should definitely make
+(examples of library suites: Hibernate, Jackson, etc) then you should definitely make
 sure to publish a BOM (Bill of Material) too. This makes it a lot easier for the consumers
 of your library suite.
 

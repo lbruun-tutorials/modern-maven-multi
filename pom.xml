@@ -239,7 +239,7 @@
               -->
               <nexusUrl>https://oss.sonatype.org/</nexusUrl>
 
-              <!-- Flip this if you feel confident about your build and it passes
+              <!-- Flip this if you feel confident about your build, and it passes
                    the rules of Maven Central                                       -->
               <autoReleaseAfterClose>false</autoReleaseAfterClose>
             </configuration>
