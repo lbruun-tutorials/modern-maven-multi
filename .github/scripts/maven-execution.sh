@@ -83,7 +83,7 @@ fi
 #
 #
 set -x
-./mvnw -X \
+./mvnw \
   --show-version \
   --batch-mode \
   --no-transfer-progress \
