@@ -9,7 +9,7 @@
     <version>${revision}${sha1}${changelist}</version> <!-- never change this -->
   </parent>
   <artifactId>core</artifactId>
-  <name>ModernMaven3 :: Multi-module Example - Serendipity - Serendipity :: Core</name>
+  <name>ModernMaven3 :: Multi-module Example - Serendipity :: Core</name>
 
   <properties>
     <maven.install.skip>false</maven.install.skip> <!-- override parent's setting -->
